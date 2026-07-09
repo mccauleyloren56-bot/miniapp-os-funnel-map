@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiniApp OS Funnel Map — Free Resource</title>
+<meta name="description" content="Build a tiny backend for leads, ideas, and future products using one simple form and five connected pieces: Tally, n8n, Notion, Beehiiv/MailerLite.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Italiana&family=Lora:ital,wght@0,400;0,600;1,400&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #010715;
+    --card: #0C1925;
+    --card-border: #1B2B38;
+    --gold: #D4A563;
+    --gold-bright: #F3CB6E;
+    --cream: #E6D7BB;
+    --muted: #A79E8F;
+    --muted-dim: #6E6759;
+    --body: #C4BAA3;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Lora', serif;
+    background-image:
+      linear-gradient(rgba(212,165,99,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,165,99,0.035) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 90px 0; border-bottom: 1px solid var(--card-border); }
+  section:last-child { border-bottom: none; }
+
+  .eyebrow {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .eyebrow .ln { width: 46px; height: 1px; background: var(--gold); opacity: 0.6; }
+  .eyebrow .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold-bright); }
+
+  h1 {
+    font-family: 'Italiana', serif;
+    font-size: clamp(40px, 8vw, 72px);
+    line-height: 1.05;
+    text-align: center;
+    font-weight: 400;
+  }
+  h2 {
+    font-family: 'Italiana', serif;
+    font-size: clamp(28px, 5vw, 40px);
+    text-align: center;
+    font-weight: 400;
+  }
+  .rule {
+    width: 100px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.6;
+    margin: 22px auto 30px auto;
+  }
+  .subtitle {
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 26px auto 0 auto;
+  }
+  .lede {
+    font-style: italic;
+    font-size: 15px;
+    color: var(--muted);
+    text-align: center;
+    max-width: 520px;
+    margin: 0 auto 40px auto;
+    line-height: 1.75;
+  }
+
+  /* hero funnel diagram */
+  .funnel { max-width: 460px; margin: 60px auto 0 auto; position: relative; }
+  .funnel-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 40px;
+    position: relative;
+    transition: border-color .25s ease, transform .25s ease;
+  }
+  .funnel-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .funnel-card:last-child { margin-bottom: 0; }
+  .funnel-icon {
+    width: 46px; height: 46px;
+    border: 1.3px solid var(--gold);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold);
+    font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 15px;
+    flex-shrink: 0;
+  }
+  .funnel-text .t { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 17px; color: var(--cream); }
+  .funnel-text .d { font-family: 'Outfit', sans-serif; font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .connector-dot {
+    position: absolute; left: 45px; bottom: -24px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--bg); border: 1.5px solid var(--gold-bright);
+  }
+
+  .tags-row { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 50px; }
+  .side-tag {
+    border: 1px solid var(--card-border);
+    border-radius: 5px;
+    padding: 14px 18px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    color: var(--gold);
+    text-transform: uppercase;
+    line-height: 1.7;
+    max-width: 190px;
+    text-align: center;
+  }
+
+  .stack-line {
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-top: 60px;
+  }
+
+  .four-grid { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 30px; }
+  .four-card {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 220px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 20px 22px;
+  }
+  .four-card .k { font-family: 'Outfit', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
+  .four-card .v { font-size: 13px; color: var(--body); line-height: 1.65; }
+
+  .body-text { font-size: 13.5px; color: var(--body); line-height: 1.9; }
+  .body-text p { margin-bottom: 18px; }
+  .body-text strong { color: var(--cream); }
+
+  .step-row { display: flex; gap: 22px; align-items: flex-start; padding: 30px 0; border-bottom: 1px solid var(--card-border); }
+  .step-row:last-child { border-bottom: none; }
+  .step-num {
+    width: 46px; height: 46px; border: 1.3px solid var(--gold); border-radius: 50%;
+    color: var(--gold); font-family: 'Italiana', serif; font-size: 19px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .step-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 16px; color: var(--cream); margin-bottom: 7px; }
+  .step-desc { font-size: 13px; color: var(--body); line-height: 1.8; }
+
+  .checklist { margin-top: 20px; }
+  .check-item { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 26px; }
+  .check-num {
+    font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 12px; color: var(--gold);
+    border: 1px solid var(--gold); width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .ct-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px; color: var(--cream); }
+  .ct-desc { font-size: 12.5px; color: var(--body); margin-top: 4px; line-height: 1.7; }
+
+  .closing-box {
+    margin-top: 40px;
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 40px 36px;
+    text-align: center;
+  }
+  .cb-eyebrow { font-family: 'Outfit', sans-serif; font-size: 10px; letter-spacing: 2.5px; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+  .cb-title { font-family: 'Italiana', serif; font-size: 26px; color: var(--cream); margin-bottom: 14px; }
+  .cb-body { font-style: italic; font-size: 13px; color: var(--muted); line-height: 1.75; max-width: 440px; margin: 0 auto; }
+
+  footer {
+    text-align: center;
+    padding: 40px 0 60px 0;
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted-dim);
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 600px) {
+    section { padding: 60px 0; }
+    .funnel-card { padding: 16px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<section id="cover">
+  <div class="wrap">
+    <div class="eyebrow"><span class="ln"></span><span class="dot"></span>&nbsp;Free Resource&nbsp;<span class="dot"></span><span class="ln"></span></div>
+    <h1>MiniApp OS<br>Funnel Map</h1>
+    <div class="rule"></div>
+    <p class="subtitle">Build a tiny backend for leads, ideas, and future products — using one simple form and five connected pieces.</p>
+
+    <div class="funnel">
+      <div class="funnel-card">
+        <div class="funnel-icon">01</div>
+        <div class="funnel-text"><div class="t">Tally Form</div><div class="d">Capture leads</div></div>
+        <div class="connector-dot"></div>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-icon">02</div>
+        <div class="funnel-text"><div class="t">n8n Router</div><div class="d">Route &amp; process</div></div>
+        <div class="connector-dot"></div>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-icon">03</div>
+        <div class="funnel-text"><div class="t">Notion Vault</div><div class="d">Store ideas &amp; insights</div></div>
+        <div class="connector-dot"></div>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-icon">04</div>
+        <div class="funnel-text"><div class="t">Beehiiv / MailerLite</div><div class="d">Nurture &amp; build audience</div></div>
+        <div class="connector-dot"></div>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-icon">05</div>
+        <div class="funnel-text"><div class="t">Future Product</div><div class="d">Validate &amp; build</div></div>
+      </div>
+    </div>
+
+    <div class="tags-row">
+      <div class="side-tag">One form.<br>Endless possibilities.</div>
+      <div class="side-tag">Leads today.<br>Products tomorrow.</div>
+    </div>
+
+    <div class="stack-line">Tally &nbsp;&middot;&nbsp; Notion &nbsp;&middot;&nbsp; n8n &nbsp;&middot;&nbsp; Beehiiv &nbsp;&middot;&nbsp; MailerLite</div>
+  </div>
+</section>
+
+<section id="idea">
+  <div class="wrap">
+    <div class="eyebrow"><span class="ln"></span><span class="dot"></span>&nbsp;The Idea&nbsp;<span class="dot"></span><span class="ln"></span></div>
+    <h2>One Form. A Whole Backend.</h2>
+    <div class="rule"></div>
+    <p class="lede">Most creators think a lead magnet needs a dozen moving parts. It doesn't. It needs one entry point — and a quiet system behind it that sorts, stores, and follows up on its own.</p>
+
+    <div class="body-text">
+      <p>A funnel doesn't have to feel like a machine with a hundred gears. The simplest version of a backend is really just <strong>one question people answer</strong>, and a handful of tools that already know what to do with the answer.</p>
+      <p>That's the whole idea behind the MiniApp OS Funnel Map. A single form becomes the front door. Everything that happens after — the routing, the storage, the follow-up email — runs quietly in the background, without you touching it after the first setup.</p>
+      <p>The value isn't in any one tool. It's in the <strong>hand-off between them</strong>. Each piece does one job, passes the result to the next piece, and gets out of the way. That's what makes it feel effortless once it's live.</p>
+    </div>
+
+    <div class="four-grid">
+      <div class="four-card"><div class="k">Without This</div><div class="v">Leads sit in your inbox. Ideas live in your notes app. Nothing talks to anything else.</div></div>
+      <div class="four-card"><div class="k">With This</div><div class="v">Every answer lands in the right place automatically — no copy-pasting, no manual follow-up.</div></div>
+      <div class="four-card"><div class="k">Built For</div><div class="v">Solo creators and small operators who want infrastructure without hiring a developer.</div></div>
+      <div class="four-card"><div class="k">Built On</div><div class="v">Five tools you can set up in an afternoon — and never think about again.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="build">
+  <div class="wrap">
+    <div class="eyebrow"><span class="ln"></span><span class="dot"></span>&nbsp;The Build&nbsp;<span class="dot"></span><span class="ln"></span></div>
+    <h2>Five Pieces, One System</h2>
+    <div class="rule"></div>
+
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Tally Form — The Front Door</div>
+        <div class="step-desc">One short form is where every relationship starts. A few well-chosen questions do double duty: they capture an email <em>and</em> tell you exactly who's on the other end — their pain point, their interest, their next step.</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">n8n Router — The Traffic Controller</div>
+        <div class="step-desc">The moment a form is submitted, n8n picks it up and decides where it goes. No manual sorting, no forgetting to follow up — the routing logic runs the same way every single time.</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Notion Vault — The Memory</div>
+        <div class="step-desc">Every lead, answer, and idea gets a permanent home. Instead of insights disappearing into a form's dashboard, they sit in a living database you can search, sort, and mine for your next product.</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Beehiiv / MailerLite — The Relationship</div>
+        <div class="step-desc">A new subscriber is added and dropped into a welcome sequence automatically. This is where a one-time visitor turns into someone who opens your emails and eventually buys.</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Future Product — The Payoff</div>
+        <div class="step-desc">Every answer stored in the vault is market research you didn't have to ask for twice. Patterns in what people say become the next template, guide, or tool you build — already validated before you make it.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <div class="eyebrow"><span class="ln"></span><span class="dot"></span>&nbsp;Getting Started&nbsp;<span class="dot"></span><span class="ln"></span></div>
+    <h2>Build Your Own Version</h2>
+    <div class="rule"></div>
+    <p class="lede">You don't need all five pieces on day one. Start with the form, and add the rest as you need it.</p>
+
+    <div class="checklist">
+      <div class="check-item">
+        <div class="check-num">1</div>
+        <div><div class="ct-title">Build one form</div><div class="ct-desc">Keep it to three to five questions. Every question should tell you something you can act on later.</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-num">2</div>
+        <div><div class="ct-title">Decide where each answer should live</div><div class="ct-desc">Map every field to a destination before you automate anything — a database row, a tag, a list.</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-num">3</div>
+        <div><div class="ct-title">Automate the hand-off</div><div class="ct-desc">Connect the form to your router so new submissions move on their own, with no manual step in between.</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-num">4</div>
+        <div><div class="ct-title">Write one welcome email</div><div class="ct-desc">A single, honest welcome message is enough to start turning subscribers into a warm audience.</div></div>
+      </div>
+      <div class="check-item">
+        <div class="check-num">5</div>
+        <div><div class="ct-title">Let it run — then read the vault</div><div class="ct-desc">Check back in a few weeks. The patterns in what people ask for are your next product roadmap.</div></div>
+      </div>
+    </div>
+
+    <div class="closing-box">
+      <div class="cb-eyebrow">Keep Building</div>
+      <div class="cb-title">This Is the Starting Point</div>
+      <div class="cb-body">The same structure behind this funnel can scale into full templates, workflow packs, and idea systems — the raw materials for whatever you build next.</div>
+    </div>
+  </div>
+</section>
+
+<footer>MiniApp OS &nbsp;&middot;&nbsp; Funnel Map</footer>
+
+</body>
+</html>
