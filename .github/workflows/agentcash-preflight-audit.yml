@@ -1,0 +1,120 @@
+name: AgentCash Preflight Audit
+
+on:
+  push:
+    branches:
+      - agentcash-preflight-audit-20260722
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TARGET_URL: https://preflight.lorensaisolutions.com
+    steps:
+      - name: Check out audit branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run read-only AgentCash discovery audit
+        shell: bash
+        run: |
+          set -u
+          mkdir -p audit
+          date -u +'%Y-%m-%dT%H:%M:%SZ' > audit/timestamp.txt
+          node --version > audit/node-version.txt
+          npm --version > audit/npm-version.txt
+
+          set +e
+          npx -y @agentcash/discovery@latest discover "$TARGET_URL" > audit/agentcash-discover.txt 2>&1
+          echo "$?" > audit/agentcash-discover.exit
+
+          npx -y @agentcash/discovery@latest check "$TARGET_URL" > audit/agentcash-check.txt 2>&1
+          echo "$?" > audit/agentcash-check.exit
+          set -e
+
+      - name: Capture public discovery documents
+        shell: bash
+        run: |
+          set +e
+          for path in / /openapi.json /.well-known/agent-card.json /.well-known/x402.json /llms.txt /SKILL.md /server.json; do
+            safe=$(echo "$path" | sed 's#^/##; s#[/.]#_#g')
+            [ -n "$safe" ] || safe=root
+            curl -sS --max-time 30 -D "audit/${safe}.headers" "$TARGET_URL$path" -o "audit/${safe}.body"
+            echo "$?" > "audit/${safe}.exit"
+          done
+          set -e
+
+      - name: Probe all six paid routes without payment
+        shell: bash
+        run: |
+          set +e
+          curl -sS --max-time 30 -D audit/preflight.headers \
+            "$TARGET_URL/v1/preflight?url=https%3A%2F%2Fexample.com&intent=research" \
+            -o audit/preflight.body
+          echo "$?" > audit/preflight.exit
+
+          curl -sS --max-time 30 -D audit/access-check.headers \
+            "$TARGET_URL/v1/access-check?url=https%3A%2F%2Fexample.com" \
+            -o audit/access-check.body
+          echo "$?" > audit/access-check.exit
+
+          curl -sS --max-time 30 -D audit/api-discovery.headers \
+            "$TARGET_URL/v1/api-discovery?url=https%3A%2F%2Fexample.com" \
+            -o audit/api-discovery.body
+          echo "$?" > audit/api-discovery.exit
+
+          curl -sS --max-time 30 -D audit/product-intel.headers \
+            "$TARGET_URL/v1/product-intel?url=https%3A%2F%2Fexample.com" \
+            -o audit/product-intel.body
+          echo "$?" > audit/product-intel.exit
+
+          curl -sS --max-time 30 -X POST -H 'content-type: application/json' \
+            -D audit/change-check.headers \
+            --data '{"url":"https://example.com","previous_snapshot":{"fingerprint":"example"}}' \
+            "$TARGET_URL/v1/change-check" -o audit/change-check.body
+          echo "$?" > audit/change-check.exit
+
+          curl -sS --max-time 30 -X POST -H 'content-type: application/json' \
+            -D audit/batch-preflight.headers \
+            --data '{"urls":["https://example.com"]}' \
+            "$TARGET_URL/v1/batch-preflight" -o audit/batch-preflight.body
+          echo "$?" > audit/batch-preflight.exit
+          set -e
+
+      - name: Summarize HTTP status and x402 headers
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, re
+
+          out = []
+          for p in sorted(Path('audit').glob('*.headers')):
+              text = p.read_text(errors='replace')
+              statuses = re.findall(r'^HTTP/\S+\s+(\d+)', text, flags=re.M)
+              headers = {}
+              for line in text.splitlines():
+                  if ':' in line:
+                      k, v = line.split(':', 1)
+                      if k.lower() in {'payment-required','www-authenticate','payment-response','content-type','location'}:
+                          headers[k.lower()] = v.strip()
+              out.append({'file': p.name, 'statuses': statuses, 'headers': headers})
+          Path('audit/http-summary.json').write_text(json.dumps(out, indent=2))
+          PY
+
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentcash-preflight-audit
+          path: audit/
+          if-no-files-found: error
+          retention-days: 7
