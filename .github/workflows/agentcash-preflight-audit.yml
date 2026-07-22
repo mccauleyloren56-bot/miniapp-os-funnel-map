@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Run AgentCash discovery and endpoint checks
+      - name: Validate all AgentCash discovery endpoints
         shell: bash
         run: |
           set -u
@@ -40,31 +40,24 @@ jobs:
           npx -y @agentcash/discovery@latest discover "$TARGET_URL" > audit/agentcash-discover.txt 2>&1
           echo "$?" > audit/agentcash-discover.exit
 
-          npx -y @agentcash/discovery@latest check "$TARGET_URL/v1/preflight" > audit/check-preflight.txt 2>&1
-          echo "$?" > audit/check-preflight.exit
-
-          npx -y @agentcash/discovery@latest check "$TARGET_URL/v1/access-check" > audit/check-access-check.txt 2>&1
-          echo "$?" > audit/check-access-check.exit
-
-          npx -y @agentcash/discovery@latest check "$TARGET_URL/v1/api-discovery" > audit/check-api-discovery.txt 2>&1
-          echo "$?" > audit/check-api-discovery.exit
-
-          npx -y @agentcash/discovery@latest check "$TARGET_URL/v1/product-intel" > audit/check-product-intel.txt 2>&1
-          echo "$?" > audit/check-product-intel.exit
-
-          npx -y @agentcash/discovery@latest check "$TARGET_URL/v1/change-check" > audit/check-change-check.txt 2>&1
-          echo "$?" > audit/check-change-check.exit
-
-          npx -y @agentcash/discovery@latest check "$TARGET_URL/v1/batch-preflight" > audit/check-batch-preflight.txt 2>&1
-          echo "$?" > audit/check-batch-preflight.exit
-
-          npx -y agentcash@latest register --help > audit/register-help.txt 2>&1
-          echo "$?" > audit/register-help.exit
+          for route in preflight access-check api-discovery product-intel change-check batch-preflight; do
+            npx -y @agentcash/discovery@latest check "$TARGET_URL/v1/$route" > "audit/check-$route.txt" 2>&1
+            echo "$?" > "audit/check-$route.exit"
+          done
           set -e
 
-      - name: Search the current AgentCash index
+      - name: Register origin with AgentCash
         shell: bash
         run: |
+          set +e
+          npx -y agentcash@latest register "$TARGET_URL" --yes --format json --sessionId preflight-20260722 > audit/agentcash-register.json 2>&1
+          echo "$?" > audit/agentcash-register.exit
+          set -e
+
+      - name: Search AgentCash index after registration
+        shell: bash
+        run: |
+          sleep 15
           set +e
           npx -y agentcash@latest --format json search "inspect an unfamiliar URL before browser automation" > audit/search-url-inspection.json 2>&1
           echo "$?" > audit/search-url-inspection.exit
